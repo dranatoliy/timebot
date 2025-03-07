@@ -1,0 +1,16 @@
+# Папка виртуального окружения
+venv/
+
+# Папка наcompiled Python файлы
+__pycache__/
+*.pyc
+
+# Файлы среды
+.env
+*.env
+
+# Файлы IDE
+.idea/
+*.iml
+
+messages.db

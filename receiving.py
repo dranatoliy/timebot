@@ -6,12 +6,14 @@ from dotenv import load_dotenv
 from db import add_message, create_database, get_message_by_id
 import getpass
 import sys
+import time
 
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN_RECEIVING')
 BOT_PASS = os.getenv('BOT_PASS_SEND')
+print(BOT_TOKEN,BOT_PASS)
 url = 'api-time-ops.tinkoff.ru'
 direct_channel_id = 'xkt8xazhotygb88ysfghqsnoca'
 channel_id = ['yx5fheddjt8xzcio1rhaafci6w', 'q4jh1xsza3gw8gt8yxcr7751xh']
@@ -32,31 +34,35 @@ async def event_handler(message):
     event_data = json.loads(message)
     if "event" in event_data and event_data["event"] == "posted":
         post_data = json.loads(event_data["data"]["post"])
+        print(post_data)
         if post_data['channel_id'] in channel_id:
             message_id = post_data['id']
             root_message = post_data['root_id']
-            print(message_id, root_message)
+            props_message = post_data['props']
             if root_message == '':
-                message_sent_id = sender_time(direct_channel_id, post_data['message'], bot_pass=BOT_PASS, url=url)
+                message_sent_id = sender_time(direct_channel_id, post_data['message'], bot_pass=BOT_PASS, url=url,props=props_message)
                 add_message(message_id, message_sent_id)
             else:
                 result_message_id = get_message_by_id(root_message)
                 if result_message_id is not None:
-                    message_sent_id = sender_time(direct_channel_id, post_data['message'], bot_pass=BOT_PASS, url=url, root=result_message_id)
+                    message_sent_id = sender_time(direct_channel_id, post_data['message'], bot_pass=BOT_PASS, url=url, props=props_message, root=result_message_id)
 
     elif "event" in event_data and event_data["event"] == "post_edited":
+
         post_data = json.loads(event_data["data"]["post"])
+        print(post_data)
         if post_data['channel_id'] in channel_id:
             message_id = post_data['id']
             message = post_data['message']
+            props_message = post_data['props']
             result_message_id = get_message_by_id(message_id)
-            update_message(direct_channel_id=direct_channel_id, message=message, bot_pass=BOT_PASS, url=url, post_id=result_message_id)
+            update_message(direct_channel_id=direct_channel_id, message=message, bot_pass=BOT_PASS, url=url, post_id=result_message_id, props=props_message)
 
 
 def password():
     # Здесь задайте ваши логин и пароль (для простоты примера)
     correct_password = "drozdov"
-    print('sdd')
+
 
     # Ввод пароля (с использованием getpass для сокрытия ввода)
     password = getpass.getpass("Введите пароль: ")
@@ -65,7 +71,8 @@ def password():
         print("Доступ разрешен!")
         # Здесь можно добавить основную логику вашей программы
     else:
-        print("Неправильный логин или пароль.")
+        print("Неправильный логин или пароль./nПрограмма закроется через 5 секунд")
+        time.sleep(5)
         sys.exit()  # Завершает выполнение программы
     return
 

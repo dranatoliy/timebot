@@ -14,3 +14,4 @@ __pycache__/
 *.iml
 
 messages.db
+time.spec

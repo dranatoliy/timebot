@@ -1,7 +1,10 @@
 from time_messenger import Driver
 import requests
 import json
+import logging
 
+
+logger = logging.getLogger('send')
 
 def bot_login(bot_pass, url):
 
@@ -50,9 +53,9 @@ def sender_time(direct_channel_id, message, bot_pass, url,props, root=None ):
         else:
             info_message = send_to_time_root(direct_channel_id, message, headers, url,root,props)
         event = info_message.json()
-        print('Успешно отправили сообщение')
+        logger.info('Успешно отправили сообщение. send.')
     except:
-        print(f'Что-то не так с отправкой ')
+        logger.warning('Что-то не так с отправкой. send.')
     return event['id']
 
 
@@ -67,9 +70,9 @@ def update_message(direct_channel_id, message, bot_pass, url, post_id,props):
     try:
         response = requests.put('https://' + url + '/api/v4/posts/'+post_id, json=payload, headers=headers)
 
-        print('Успешно отправили сообщение')
+        logger.info('Успешно отправили сообщение. update.')
     except:
-        print(f'Что-то не так с отправкой ')
+        logger.warning('Что-то не так с отправкой. update.')
 
 
 

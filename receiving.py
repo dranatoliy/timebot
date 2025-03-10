@@ -7,7 +7,14 @@ from db import add_message, create_database, get_message_by_id
 import getpass
 import sys
 import time
+import logging
 
+# Настройка логирования
+logging.basicConfig(
+    filename='project.log',  # Имя файла для логирования
+    level=logging.DEBUG,      # Устанавливаем уровень логирования
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'  # Формат записей
+)
 
 load_dotenv()
 
@@ -77,11 +84,12 @@ def init_websocket_with_reconnect(driver, event_handler):
     while True:
         try:
             # Инициализация вебсокета
+            logging.info('Инициализация вебсокет')
             driver.init_websocket(event_handler)
+            logging.warning('Сбросился вебсокет')
 
-        except Exception as e:
-            print(f"Ошибка при подключении к вебсокету: {e}")
-            print("Попытка переподключения через 1 секунд...")
+        except:
+            logging.warning(f"Ошибка при подключении к вебсокету")
             time.sleep(1)  # Задержка перед повторной попыткой подключения
 
 
@@ -89,9 +97,11 @@ if __name__ == "__main__":
     # Создаем базу данных и таблицу
     # password()
     create_database()
+    logging.info('Запускаем программу')
 
     time_driver = Driver(options=driver_config)
 
     with time_driver:
         time_driver.login()
+        logging.info('Логинимся')
         init_websocket_with_reconnect(time_driver, event_handler)

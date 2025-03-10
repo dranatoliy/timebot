@@ -15,3 +15,6 @@ __pycache__/
 
 messages.db
 time.spec
+
+build/
+dist/

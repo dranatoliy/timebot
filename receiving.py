@@ -13,9 +13,8 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN_RECEIVING')
 BOT_PASS = os.getenv('BOT_PASS_SEND')
-print(BOT_TOKEN,BOT_PASS)
 url = 'api-time-ops.tinkoff.ru'
-direct_channel_id = 'xkt8xazhotygb88ysfghqsnoca'
+direct_channel_id = 'kwqf11zwujbtfbuu3uhmu847ry'
 channel_id = ['yx5fheddjt8xzcio1rhaafci6w', 'q4jh1xsza3gw8gt8yxcr7751xh']
 
 
@@ -34,7 +33,6 @@ async def event_handler(message):
     event_data = json.loads(message)
     if "event" in event_data and event_data["event"] == "posted":
         post_data = json.loads(event_data["data"]["post"])
-        print(post_data)
         if post_data['channel_id'] in channel_id:
             message_id = post_data['id']
             root_message = post_data['root_id']
@@ -50,7 +48,6 @@ async def event_handler(message):
     elif "event" in event_data and event_data["event"] == "post_edited":
 
         post_data = json.loads(event_data["data"]["post"])
-        print(post_data)
         if post_data['channel_id'] in channel_id:
             message_id = post_data['id']
             message = post_data['message']
@@ -59,30 +56,42 @@ async def event_handler(message):
             update_message(direct_channel_id=direct_channel_id, message=message, bot_pass=BOT_PASS, url=url, post_id=result_message_id, props=props_message)
 
 
-def password():
-    # Здесь задайте ваши логин и пароль (для простоты примера)
-    correct_password = "drozdov"
+# def password():
+#     # Здесь задайте ваши логин и пароль (для простоты примера)
+#     correct_password = "drozdov"
+#
+#
+#     # Ввод пароля (с использованием getpass для сокрытия ввода)
+#     password = getpass.getpass("Введите пароль: ")
+#     correct_password = "drozdov"
+#     if password == correct_password:
+#         print("Доступ разрешен!")
+#         # Здесь можно добавить основную логику вашей программы
+#     else:
+#         print("Неправильный логин или пароль./nПрограмма закроется через 5 секунд")
+#         time.sleep(5)
+#         sys.exit()  # Завершает выполнение программы
+#     return
 
+def init_websocket_with_reconnect(driver, event_handler):
+    while True:
+        try:
+            # Инициализация вебсокета
+            driver.init_websocket(event_handler)
 
-    # Ввод пароля (с использованием getpass для сокрытия ввода)
-    password = getpass.getpass("Введите пароль: ")
-    correct_password = "drozdov"
-    if password == correct_password:
-        print("Доступ разрешен!")
-        # Здесь можно добавить основную логику вашей программы
-    else:
-        print("Неправильный логин или пароль./nПрограмма закроется через 5 секунд")
-        time.sleep(5)
-        sys.exit()  # Завершает выполнение программы
-    return
+        except Exception as e:
+            print(f"Ошибка при подключении к вебсокету: {e}")
+            print("Попытка переподключения через 1 секунд...")
+            time.sleep(1)  # Задержка перед повторной попыткой подключения
+
 
 if __name__ == "__main__":
     # Создаем базу данных и таблицу
-    password()
+    # password()
     create_database()
 
     time_driver = Driver(options=driver_config)
 
     with time_driver:
         time_driver.login()
-        time_driver.init_websocket(event_handler)
+        init_websocket_with_reconnect(time_driver, event_handler)
